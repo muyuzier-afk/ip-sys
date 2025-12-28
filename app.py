@@ -8,7 +8,13 @@ import requests
 from datetime import datetime
 
 app = Flask(__name__)
-DB_PATH = 'ip_records.db'
+
+# 获取应用根目录（兼容各种部署环境）
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# 数据库放到 /tmp（容器可写目录），本地开发放当前目录
+DB_PATH = '/tmp/ip_records.db' if os.path.exists('/tmp') else os.path.join(BASE_DIR, 'ip_records.db')
+# 图片使用绝对路径
+IMG_PATH = os.path.join(BASE_DIR, 'background.png')
 
 
 def init_db():
@@ -23,6 +29,9 @@ def init_db():
     )''')
     conn.commit()
     conn.close()
+
+# 模块加载时初始化数据库（兼容 gunicorn）
+init_db()
 
 def get_ip_info(ip):
     """获取IP地理位置信息"""
@@ -57,7 +66,7 @@ def background():
     if ',' in ip:
         ip = ip.split(',')[0].strip()
     log_ip(ip)
-    return send_file('background.png', mimetype='image/png')
+    return send_file(IMG_PATH, mimetype='image/png')
 
 @app.route('/adminpanel')
 def admin_panel():
